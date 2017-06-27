@@ -1,10 +1,18 @@
 #!/bin/bash
+#usage:
+##./splitTask.sh num_of_batches original-taskfile original-jobfile subfold
+
 
 max=$1 #number of subtask
 taskfile=$2 #original task file
 jobfile=$3  #original job file
-outfold=$4  #folder to put the temporary files (allows to run "parallel master" job)
+outfold=$4  #folder to put the temporary files (allows to run "parallel master" job) => could/should be replaced by the original jobfile name 
 
+if [ ! -d "$outfold" ]; then
+	mkdir $outfold
+else
+	echo "warning split folder already exist, previous split file may be overwritten"
+fi
 
 ntask=`wc -l < "$taskfile" `
 nsubtask=$((ntask/max))
