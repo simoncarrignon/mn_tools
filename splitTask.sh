@@ -4,9 +4,16 @@
 
 
 max=$1 #number of subtask
-taskfile=$2 #original task file
-jobfile=$3  #original job file
-outfold=$4  #folder to put the temporary files (allows to run "parallel master" job) => could/should be replaced by the original jobfile name 
+jobfile=$2  #original job file
+#taskfile=$2 #original task file
+#jobfile=$3  #original job file
+#outfold=$4  #folder to put the temporary files (allows to run "parallel master" job) => could/should be replaced by the original jobfile name 
+
+expname=`basename $jobfile`
+expname=${expname%.*}
+outfold=$expname
+taskfile=taskfile/$expname.task
+
 
 if [ ! -d "$outfold" ]; then
 	mkdir $outfold
@@ -19,13 +26,16 @@ nsubtask=$((ntask/max))
 
 echo $nsubtask
 i=0
-prevjob_id=0
+prevjob_id=$3
 
+echo "$taskfile $jobfile $outfold"
+
+max=$(( $max - 1 ))
 while [ "$i" -le "$max" ];
 do
 
 	echo $i
-	head -n "$(( $i * $nsubtask + $nsubtask -1 ))" "$taskfile"| tail -n +"$(( $i * $nsubtask ))" > $outfold/tmp.task_$i
+	head -n "$(( $i * $nsubtask + $nsubtask - 1 ))" "$taskfile"| tail -n +"$(( $i * $nsubtask ))" > $outfold/tmp.task_$i
 	sed  -e "s%FILE=$taskfile%FILE=$outfold/tmp.task_$i%" -e "s%#BSUB -n .*%#BSUB -n $nsubtask%" $jobfile > $outfold/tmp.job_$i
 	
 	if [ $prevjob_id -eq 0 ];
